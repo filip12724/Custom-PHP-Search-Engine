@@ -1,0 +1,10 @@
+a:2:{i:0;s:42:"http://crl.prod.cagenerator.pki.strln.net/";i:1;s:201:"<html>
+    <body>
+        <h1>CA Generator CRL</h1>
+        <ul>
+            <li><a href="/ca.pem">ca.pem</a></li>
+            <li><a href="/crl.pem">crl.pem</a></li>
+        </ul>
+    </body>
+</html>
+";}

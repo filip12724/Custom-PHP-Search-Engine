@@ -25,7 +25,7 @@ while(! $reader->eof()){
         && ! isset($seen[$url]) 
     ){
         $seen[$url] = true;
-        $writer->fwrite("{$rank} http://{$url}/\n");
+        $writer->fwrite("http://{$url}/\n");
     }
 
 }

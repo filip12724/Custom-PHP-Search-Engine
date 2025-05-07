@@ -1,5 +1,4 @@
 <?php
-// crawler.php
 
 // 1) get the URL from argv
 if ($argc < 2) {
@@ -7,7 +6,6 @@ if ($argc < 2) {
     exit(1);
 }
 $url = trim($argv[1]);
-
 // 2) hash it and split into two‑level dirs
 $md5  = md5($url);
 $one  = substr($md5, 0, 2);

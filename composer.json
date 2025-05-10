@@ -9,7 +9,11 @@
     "phpunit/phpunit": "^12.1"
   },
   "scripts": {
-    "test": "phpunit"
+    "test": "phpunit",
+    "crawl": "php bin/php/crawler.php",
+    "parse": "php bin/php/parse_and_dedupe.php",
+    "app:search": "php bin/php/search.php",
+    "process": "bin/bash/process_chunks.sh"
   },
   "autoload": {
     "psr-4": {

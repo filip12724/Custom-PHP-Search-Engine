@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-set -u -o pipefail    # note: no -e here, we’ll handle errors explicitly
+set -u -o pipefail  
 
 WORKERS=32
 TIMEOUT=30

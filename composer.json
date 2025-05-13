@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "phpunit",
-    "build-index": "php bin/build-index.php"
+    "build-index": "php bin/php/build-index.php"
   },
   "autoload": {
     "psr-4": {

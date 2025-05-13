@@ -25,14 +25,10 @@ final class indexBuilder
             $terms = $this->tokenizer->countTerms($doc['body']);
 
             foreach($terms as $term => $freq){
-                $postings[$term][] = ['id' => $id, 'freq' => $freq]; 
+                $this->index->store($term, [['id' => $id, 'freq' => $freq]]); 
             }
         }
 
-
-        foreach($postings as $term => $docs){
-            $this->index->store($term,$docs);
-        }
 
     }
 }

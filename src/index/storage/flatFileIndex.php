@@ -17,35 +17,65 @@ class flatFileIndex implements IndexInterface{
         }
     }
 
-    public function store(string $term, array $documents): bool
-    {
-        if($term === ''){
-            throw new InvalidArgumentException("Cannot store empty term");
-        }
-        $path = $this->dir . '/' . rawurlencode($term) . '.idx';
+   public function store(string $term, array $documents): bool {
+        $bucket = hash('crc32', $term) % 256;
+        $filename = "index_$bucket.idx";
+        $path = $this->dir . '/' . $filename;
 
-        $fp = fopen($path,'wb');
-
-        foreach($documents as $doc){
+        $fp = fopen($path, 'ab');
+        
+        fwrite($fp, pack('i', strlen($term))); 
+        fwrite($fp, $term);
+        
+        fwrite($fp, pack('i', count($documents))); 
+        foreach ($documents as $doc) {
             fwrite($fp, pack('i*', $doc['id'], $doc['freq']));
         }
         fclose($fp);
         return true;
     }
 
-    public function fetch(string $term): array
-    {
-            $path = $this->dir . '/' . rawurlencode($term) . '.idx';
-            if (!file_exists($path)) {
-                return [];
+    public function fetch(string $term): array {
+        $bucket = hash('crc32', $term) % 256;
+        $filename = "index_$bucket.idx";
+        $path = $this->dir . '/' . $filename;
+
+        if (!file_exists($path)) {
+            return [];
+        }
+
+        $bytes = file_get_contents($path);
+        $offset = 0;
+        $out = [];
+
+        while ($offset < strlen($bytes)) {
+            
+            $termLength = unpack('i', substr($bytes, $offset, 4))[1];
+            $offset += 4;
+            
+            $currentTerm = substr($bytes, $offset, $termLength);
+            $offset += $termLength;
+            
+            $docCount = unpack('i', substr($bytes, $offset, 4))[1];
+            $offset += 4;
+
+            
+            if ($currentTerm === $term) {
+                for ($i = 0; $i < $docCount; $i++) {
+                    $id = unpack('i', substr($bytes, $offset, 4))[1];
+                    $offset += 4;
+                    $freq = unpack('i', substr($bytes, $offset, 4))[1];
+                    $offset += 4;
+                    $out[] = ['id' => $id, 'freq' => $freq];
+                }
+                return $out; 
+            } else {
+               
+                $offset += $docCount * 8;
             }
-            $bytes = file_get_contents($path);
-            $ints  = array_values(unpack('i*', $bytes));
-            $out   = [];
-            for ($i = 0; $i < count($ints); $i += 2) {
-                $out[] = ['id' => $ints[$i], 'freq' => $ints[$i+1]];
-            }
-            return $out;
+        }
+
+        return [];
     }
 }
 

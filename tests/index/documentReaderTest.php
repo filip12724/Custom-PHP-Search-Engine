@@ -4,6 +4,9 @@ namespace Tests\Index;
 use PHPUnit\Framework\TestCase;
 use App\util\documentReader;
 
+/**
+ * @coversDefaultClass \App\util\documentReader
+ */
 class DocumentReaderTest extends TestCase
 {
 
@@ -12,9 +15,11 @@ class DocumentReaderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->reader = new documentReader(__DIR__ . '/../../documents');
+        $this->reader = new documentReader(__DIR__ . '/../fixtures/documents');
     }
-
+    /**
+     * @covers ::getAll
+     */
     public function testGetAllReturnsExpectedContent()
     {
         $generator = $this->reader->getAll();

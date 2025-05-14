@@ -18,7 +18,7 @@ class flatFileIndex implements IndexInterface{
     }
 
    public function store(string $term, array $documents): bool {
-        $bucket = hash('crc32', $term) % 256;
+        $bucket = crc32($term) % 256;
         $filename = "index_$bucket.idx";
         $path = $this->dir . '/' . $filename;
 
@@ -36,7 +36,7 @@ class flatFileIndex implements IndexInterface{
     }
 
     public function fetch(string $term): array {
-        $bucket = hash('crc32', $term) % 256;
+        $bucket = crc32($term) % 256;
         $filename = "index_$bucket.idx";
         $path = $this->dir . '/' . $filename;
 

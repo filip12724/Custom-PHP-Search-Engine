@@ -11,7 +11,8 @@ use App\Util\DocumentReader;
 $reader    = new DocumentReader(__DIR__ . '/documents');
 $tokenizer = new Tokenizer();
 $index     = new FlatFileIndex(__DIR__ . '/data/index');
-$totalDocs = iterator_count($reader->getAll());
+$totalDocs = (int) @file_get_contents(__DIR__ . '/data/index/totalDocs.txt');
+
 
 $searchSvc = new SimpleSearch($tokenizer, $index, $reader, $totalDocs);
 

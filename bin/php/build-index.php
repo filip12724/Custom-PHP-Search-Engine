@@ -1,4 +1,4 @@
-<?php
+<?php 
 declare(strict_types=1);
 
 require __DIR__ . '/../../vendor/autoload.php';
@@ -35,4 +35,11 @@ echo sprintf(
     "Done in %.2f seconds, peak memory: %.1f MB\n",
     $duration,
     $memPeak
-);
+) . "\n";
+
+
+$totalDocs = iterator_count($reader->getAll());
+
+file_put_contents($indexDir . '/totalDocs.txt', (string)$totalDocs);
+
+echo "Wrote totalDocs ({$totalDocs}) to {$indexDir}/totalDocs.txt\n";

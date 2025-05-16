@@ -34,9 +34,13 @@ $results = $searchSvc->search($q, $page, 10);
   <ul>
   <?php foreach ($results['results'] as $r): ?>
     <li>
+      <?php if (empty($r)): ?>
+      <em>MISSING DOCUMENT (ID: <?= $docId ?>)</em>
+    <?php else: ?>
       <strong><?=htmlspecialchars($r['title'])?></strong>
       <em>(score: <?= $r['score'] ?>)</em>
       <p><?=htmlspecialchars($r['snippet'])?></p>
+        <?php endif; ?>
     </li>
   <?php endforeach; ?>
   </ul>

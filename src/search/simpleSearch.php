@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 declare (strict_types=1);
 
 namespace App\search;
@@ -7,8 +8,8 @@ use App\index\contracts\IndexInterface;
 use App\index\contracts\TokenizerInterface;
 use App\util\documentReader;
 
-final class simpleSearch implements searchInterface{
-
+final class simpleSearch implements searchInterface
+{
     public function __construct(
         private TokenizerInterface $tokenizer,
         private IndexInterface $index,
@@ -18,14 +19,12 @@ final class simpleSearch implements searchInterface{
 
     public function search(string $query, int $page = 1, int $perPage = 10): array
     {
-        
         $terms = $this->cleanAndCount($query);
         if (empty($terms)) {
             return ['total' => 0, 'results' => []];
         }
 
-        
-        $scores = [];   
+        $scores = [];
         foreach ($terms as $term => $qFreq) {
             $postings = $this->index->fetch($term);
             $df       = count($postings);
@@ -36,7 +35,6 @@ final class simpleSearch implements searchInterface{
             foreach ($postings as $post) {
                 $docId = $post['id'];
                 $tf    = $post['freq'];
-                
                 $scores[$docId] = ($scores[$docId] ?? 0.0) + ($tf * $idf * $qFreq);
             }
         }
@@ -45,22 +43,24 @@ final class simpleSearch implements searchInterface{
             return ['total' => 0, 'results' => []];
         }
 
-        
         arsort($scores);
         $totalHits = count($scores);
         $slice     = array_slice($scores, ($page - 1) * $perPage, $perPage, true);
 
-        
         $results = [];
         foreach ($slice as $docId => $score) {
             $doc = $this->reader->getById($docId);
-            $text = $doc['body'];
             
+            if (!is_array($doc) || !isset($doc['body']) || !is_string($doc['body'])) {
+                continue;
+            }
+            $text = $doc['body'];
             $snippet = $this->makeSnippet($text, array_keys($terms));
+
             $results[] = [
                 'id'      => $docId,
                 'score'   => round($score, 4),
-                'title'   => $doc['title'] ?? "Doc #{$docId}",
+                'title'   => isset($doc['title']) && is_string($doc['title']) ? $doc['title'] : "Doc #{$docId}",
                 'snippet' => $snippet,
             ];
         }
@@ -71,12 +71,13 @@ final class simpleSearch implements searchInterface{
         ];
     }
 
-    private function cleanAndCount(string $q): array{
+    private function cleanAndCount(string $q): array
+    {
         $clean = mb_strtolower($q);
         $clean = preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $clean);
         $clean = preg_replace('/\s+/u', ' ', trim($clean));
 
-        if($clean === ''){
+        if ($clean === '') {
             return [];
         }
         $tokens = explode(' ', $clean);
@@ -101,5 +102,3 @@ final class simpleSearch implements searchInterface{
         return ($start > 0 ? '…' : '') . $snippet . '…';
     }
 }
-
-?>

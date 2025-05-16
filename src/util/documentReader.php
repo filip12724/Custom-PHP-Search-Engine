@@ -9,7 +9,7 @@ class documentReader{
         private string $baseDir = __DIR__
     ){}
 
-    public function getAll(): iterable
+ public function getAll(): iterable
 {
     $it = new \RecursiveIteratorIterator(
         new \RecursiveDirectoryIterator(
@@ -19,52 +19,54 @@ class documentReader{
     );
 
     foreach ($it as $file) {
-        if ($file->isFile() && $file->getSize() > 0) {
+        $filename = $file->getFilename();
+        // Extract ID from the first 8 characters of filename
+        $hexId = substr($filename, 0, 8);
+        $id = hexdec($hexId);
+        
+        // Ensure valid ID and filename format
+        if ($file->isFile() && $file->getSize() > 0 && strspn($hexId, '0123456789abcdef') === 8) {
             try {
                 $data = file_get_contents($file->getPathname());
                 $document = unserialize($data);
                 
                 if ($this->validateDocument($document)) {
                     yield [
-                        'id' => hexdec(substr($file->getFilename(), 0, 8)),
+                        'id' => $id,
                         'url' => $document[0],
-                        'body' => $document[1]
+                        'body' => $document[1],
+                        'title' => $document[0] // Use URL as title
                     ];
                 }
             } catch (\Exception $e) {
-                var_dump($e);
+                error_log("Error reading {$filename}: " . $e->getMessage());
                 continue;
             }
         }
     }
 }
 
-
 public function getById(int $id): ?array
-    {
-        $hexId = str_pad(dechex($id), 8, '0', STR_PAD_LEFT);
+{
+    $hexId = str_pad(dechex($id), 8, '0', STR_PAD_LEFT);
+    $filename = $hexId . '*.ser'; 
 
+    foreach (glob($this->baseDir . '/' . $filename) as $file) {
+        $data = file_get_contents($file);
+        $doc = @unserialize($data);
         
-        foreach (new \FilesystemIterator($this->baseDir) as $file) {
-            if (! $file->isFile()) {
-                continue;
-            }
-            if (str_starts_with($file->getFilename(), $hexId)) {
-                $data = file_get_contents($file->getPathname());
-                $doc  = @unserialize($data);
-                if (is_array($doc) && $this->validateDocument($doc)) {
-                    return [
-                        'id'    => $id,
-                        'url'   => $doc[0],
-                        'body'  => $doc[1],
-                    ];
-                }
-            }
+        if ($this->validateDocument($doc)) {
+            return [
+                'id' => $id,
+                'url' => $doc[0],
+                'body' => $doc[1],
+                'title' => $doc[0] 
+            ];
         }
-
-        return null;
+    }
+    
+    return null;
 }
-
 private function validateDocument(array $document): bool
 {
     return count($document) === 2 

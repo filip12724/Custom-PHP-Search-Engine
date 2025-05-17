@@ -30,12 +30,12 @@ $results = $searchSvc->search($q, $page, 10);
 <body>
   <form><input name="q" value="<?=htmlspecialchars($q)?>"><button>Search</button></form>
 
-  <p><?= $results['total'] ?> results found.</p>
+  
   <ul>
   <?php foreach ($results['results'] as $r): ?>
     <li>
       <?php if (empty($r)): ?>
-      <em>MISSING DOCUMENT (ID: <?= $docId ?>)</em>
+      <em>MISSING DOCUMENT (ID: <?= $r['id'] ?? 'unknown' ?>)</em>
     <?php else: ?>
       <strong><?=htmlspecialchars($r['title'])?></strong>
       <em>(score: <?= $r['score'] ?>)</em>

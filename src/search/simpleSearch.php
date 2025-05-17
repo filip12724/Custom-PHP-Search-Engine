@@ -17,6 +17,8 @@ final class simpleSearch implements searchInterface
         private int $totalDocs
     ){}
 
+    
+
     public function search(string $query, int $page = 1, int $perPage = 10): array
     {
         $terms = $this->cleanAndCount($query);

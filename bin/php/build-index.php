@@ -10,10 +10,12 @@ use App\index\indexBuilder;
 
 // prep
 $docsDir  = realpath(__DIR__.'/../../documents');
-$indexDir = realpath(__DIR__.'/../../data/index');
+$indexDir = __DIR__ . '/../../data/index';
 if (!is_dir($indexDir)) {
     mkdir($indexDir, 0755, true);
 }
+$indexDir = realpath($indexDir); 
+
 
 $reader    = new documentReader($docsDir);
 $tokenizer = new tokenizer();
@@ -24,22 +26,13 @@ $builder   = new indexBuilder($reader, $tokenizer, $index);
 $startTime = microtime(true);
 
 // run
-echo "Rebuilding index…\n";
-$builder->rebuild();
-
-// report
-$duration = microtime(true) - $startTime;
-$memPeak  = memory_get_peak_usage(true) / 1024 / 1024;
-
-echo sprintf(
-    "Done in %.2f seconds, peak memory: %.1f MB\n",
-    $duration,
-    $memPeak
-) . "\n";
-
-
 $totalDocs = iterator_count($reader->getAll());
-
 file_put_contents($indexDir . '/totalDocs.txt', (string)$totalDocs);
+echo "Wrote totalDocs ({$totalDocs}) before rebuild\n";
 
-echo "Wrote totalDocs ({$totalDocs}) to {$indexDir}/totalDocs.txt\n";
+// 2) now rebuild
+echo "Rebuilding index…\n";
+$start = microtime(true);
+$builder->rebuild();
+$dur = microtime(true) - $start;
+echo sprintf("Done in %.2f sec\n", $dur);

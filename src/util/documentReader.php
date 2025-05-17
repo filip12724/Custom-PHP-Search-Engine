@@ -20,11 +20,10 @@ class documentReader{
 
     foreach ($it as $file) {
         $filename = $file->getFilename();
-        // Extract ID from the first 8 characters of filename
+        
         $hexId = substr($filename, 0, 8);
         $id = hexdec($hexId);
         
-        // Ensure valid ID and filename format
         if ($file->isFile() && $file->getSize() > 0 && strspn($hexId, '0123456789abcdef') === 8) {
             try {
                 $data = file_get_contents($file->getPathname());
@@ -35,7 +34,7 @@ class documentReader{
                         'id' => $id,
                         'url' => $document[0],
                         'body' => $document[1],
-                        'title' => $document[0] // Use URL as title
+                        'title' => $document[0] 
                     ];
                 }
             } catch (\Exception $e) {
@@ -49,7 +48,7 @@ class documentReader{
 public function getById(int $id): ?array
 {
     $hexId = str_pad(dechex($id), 8, '0', STR_PAD_LEFT);
-    $filename = $hexId . '*.ser'; 
+    $filename = $hexId . '*'; 
 
     foreach (glob($this->baseDir . '/' . $filename) as $file) {
         $data = file_get_contents($file);

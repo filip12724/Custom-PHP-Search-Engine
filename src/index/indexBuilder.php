@@ -19,16 +19,25 @@ final class indexBuilder
 
         $this->index->clear();
 
-        $postings = [];
-        foreach($this->reader->getAll() as $doc){
-            $id = $doc['id'];
-            $terms = $this->tokenizer->countTerms($doc['body']);
+       $globalPostings = [];
 
-            foreach($terms as $term => $freq){
-                $this->index->store((string) $term, [['id' => $id, 'freq' => $freq]]);
+        foreach ($this->reader->getAll() as $doc) {
+            $docId = $doc['id'];
+            $termsWithFreq = $this->tokenizer->countTerms($doc['body']);
+
+            foreach ($termsWithFreq as $term => $freq) {
+                
+                $globalPostings[$term][] = [
+                    'id'   => $docId,
+                    'freq' => $freq,
+                ];
             }
         }
 
+        
+        foreach ($globalPostings as $term => $docsArray) {
+            $this->index->store($term, $docsArray);
+        }
 
     }
 }
